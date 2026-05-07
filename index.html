@@ -1,306 +1,697 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fiszki</title>
-  <style>
-    :root {
-      --bg: #0f172a;
-      --panel: #111827;
-      --panel-2: #1f2937;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --accent: #60a5fa;
-      --good: #22c55e;
-      --bad: #ef4444;
-      --border: rgba(255,255,255,.08);
-      --shadow: 0 18px 50px rgba(0,0,0,.25);
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fiszki</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #111827;
+            --panel-2: #1f2937;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --accent: #60a5fa;
+            --good: #22c55e;
+            --bad: #ef4444;
+            --warn: #f59e0b;
+            --border: rgba(255, 255, 255, .08);
+            --shadow: 0 18px 50px rgba(0, 0, 0, .25);
+        }
 
-    * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(circle at top, #1e293b 0%, var(--bg) 55%);
-      color: var(--text);
-      min-height: 100vh;
-    }
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            background: radial-gradient(circle at top, #1e293b 0%, var(--bg) 55%);
+            color: var(--text);
+            min-height: 100vh;
+        }
 
-    .wrap {
-      max-width: 920px;
-      margin: 0 auto;
-      padding: 24px;
-    }
+        .wrap {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 24px;
+        }
 
-    .header {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      justify-content: space-between;
-      align-items: end;
-      margin-bottom: 18px;
-    }
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: space-between;
+            align-items: end;
+            margin-bottom: 18px;
+        }
 
-    h1 { margin: 0; font-size: 38px; }
-    .sub { color: var(--muted); margin-top: 6px; }
+        h1 {
+            margin: 0;
+            font-size: 38px;
+            letter-spacing: -0.5px;
+        }
+        .sub {
+            color: var(--muted);
+            margin-top: 6px;
+            font-size: 14px;
+        }
 
-    .chipbar { display: flex; gap: 10px; flex-wrap: wrap; }
-    .chip {
-      background: rgba(255,255,255,.05);
-      border: 1px solid var(--border);
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-size: 14px;
-    }
+        .chipbar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .chip {
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .chip.green {
+            border-color: rgba(34, 197, 94, 0.4);
+            color: var(--good);
+        }
+        .chip.red {
+            border-color: rgba(239, 68, 68, 0.4);
+            color: var(--bad);
+        }
 
-    .panel {
-      background: rgba(17, 24, 39, .92);
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
+        .btn-reset {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--muted);
+            padding: 8px 14px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-reset:hover {
+            border-color: var(--bad);
+            color: var(--bad);
+            background: rgba(239, 68, 68, 0.08);
+        }
 
-    .main { padding: 22px; }
+        .panel {
+            background: rgba(17, 24, 39, .92);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
 
-    .progress {
-      color: var(--muted);
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-    }
+        .main {
+            padding: 22px;
+        }
 
-    .bar {
-      height: 12px;
-      background: rgba(255,255,255,.07);
-      border-radius: 999px;
-      overflow: hidden;
-      margin-top: 10px;
-    }
+        .progress {
+            color: var(--muted);
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
 
-    .bar > div {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--accent), #a78bfa);
-      transition: width .25s ease;
-    }
+        .bar {
+            height: 12px;
+            background: rgba(255, 255, 255, .07);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
 
-    .card {
-      margin-top: 18px;
-      padding: 20px;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      background: rgba(255,255,255,.03);
-      min-height: 320px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
+        .bar>div {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), #a78bfa);
+            transition: width .35s ease;
+            border-radius: 999px;
+        }
 
-    .section-title { color: var(--muted); margin: 0; }
-    .content { font-size: 20px; white-space: pre-wrap; line-height: 1.6; }
+        .card {
+            margin-top: 18px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, .03);
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
 
-    img {
-      max-width: 100%;
-      border-radius: 12px;
-      margin: 10px 0;
-      border: 1px solid var(--border);
-      display: block;
-    }
+        .section-title {
+            color: var(--muted);
+            margin: 0;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .content {
+            font-size: 20px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            word-break: break-word;
+        }
 
-    .buttons {
-      display: flex;
-      gap: 12px;
-      margin-top: auto;
-      flex-wrap: wrap;
-    }
+        .answer-block {
+            border-top: 1px solid var(--border);
+            padding-top: 12px;
+            margin-top: 4px;
+        }
+        .answer-block b {
+            color: var(--accent);
+        }
 
-    button {
-      border: 0;
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      min-width: 110px;
-    }
+        img {
+            max-width: 100%;
+            border-radius: 12px;
+            margin: 10px 0;
+            border: 1px solid var(--border);
+            display: block;
+        }
 
-    button:disabled {
-      opacity: .55;
-      cursor: not-allowed;
-    }
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: auto;
+            flex-wrap: wrap;
+        }
 
-    .primary { background: var(--accent); color: #fff; }
-    .good { background: var(--good); color: #fff; }
-    .bad { background: var(--bad); color: #fff; }
+        button {
+            border: 0;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            min-width: 110px;
+            font-size: 15px;
+            transition: all 0.15s;
+        }
 
-    .end {
-      text-align: center;
-      padding: 40px;
-    }
+        button:active {
+            transform: scale(0.96);
+        }
 
-    .end h2 { margin-top: 0; }
-  </style>
+        button:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .primary:hover {
+            background: #3b82f6;
+        }
+        .good {
+            background: var(--good);
+            color: #fff;
+        }
+        .good:hover {
+            background: #16a34a;
+        }
+        .bad {
+            background: var(--bad);
+            color: #fff;
+        }
+        .bad:hover {
+            background: #dc2626;
+        }
+
+        .end {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .end h2 {
+            margin-top: 0;
+        }
+        .end .btn-reset {
+            margin-top: 18px;
+            display: inline-block;
+            padding: 12px 20px;
+            font-size: 14px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: #e5e7eb;
+            border: 1px solid var(--border);
+            padding: 12px 22px;
+            border-radius: 999px;
+            font-size: 14px;
+            z-index: 999;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            animation: toastIn 0.3s ease, toastOut 0.3s ease 2.2s forwards;
+            pointer-events: none;
+        }
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+        }
+
+        #error {
+            color: #fca5a5;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 28px;
+            }
+            .content {
+                font-size: 17px;
+            }
+            button {
+                min-width: 90px;
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+            .buttons {
+                gap: 8px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="header">
-      <div>
-        <h1>Fiszki</h1>
-        <div class="sub">Jedna paczka fiszek z pliku fiszki.txt (i obrazków w tym samym folderze)</div>
-      </div>
-      <div class="chipbar">
-        <div class="chip" id="total">Fiszki: 0</div>
-        <div class="chip" id="know">Wiem: 0</div>
-        <div class="chip" id="dont">Nie wiem: 0</div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="main">
-        <div class="progress">
-          <div id="status">Ładowanie...</div>
-          <div id="counter">0/0</div>
-        </div>
-        <div class="bar"><div id="bar"></div></div>
-
-        <div id="app"></div>
-        <div id="error" style="color:#fca5a5;margin-top:10px;"></div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const state = {
-      cards: [],
-      queue: [],
-      show: false,
-      know: 0,
-      dont: 0
-    };
-
-    const app = document.getElementById('app');
-    const error = document.getElementById('error');
-
-    function parse(txt) {
-      const re = /Fiszka\s+(\d+)\s*\n\s*Pytanie:\s*\n([\s\S]*?)\n\s*Odpowiedź:\s*\n([\s\S]*?)(?=\n\s*Fiszka|$)/g;
-      let m, arr = [];
-      while ((m = re.exec(txt))) {
-        arr.push({
-          n: +m[1],
-          q: m[2].trim(),
-          a: m[3].trim()
-        });
-      }
-      return arr.sort((a, b) => a.n - b.n);
-    }
-
-    function renderText(t) {
-      return t.replace(/([^\s]+\.(png|jpg|jpeg|webp|gif))/g, '<img src="$1" onerror="this.remove()">');
-    }
-
-    function updateChips() {
-      document.getElementById('total').innerText = `Fiszki: ${state.cards.length}`;
-      document.getElementById('know').innerText = `Wiem: ${state.know}`;
-      document.getElementById('dont').innerText = `Nie wiem: ${state.dont}`;
-    }
-
-    function render() {
-      updateChips();
-
-      if (state.cards.length === 0) {
-        app.innerHTML = `<div class="end"><h2>Brak fiszek</h2></div>`;
-        document.getElementById('status').innerText = 'Brak danych';
-        document.getElementById('counter').innerText = '0/0';
-        document.getElementById('bar').style.width = '0%';
-        return;
-      }
-
-      if (state.queue.length === 0) {
-        app.innerHTML = `
-          <div class="end">
-            <h2>Gratulacje 🎉</h2>
-            <p>Wszystkie fiszki zostały opanowane.</p>
-            <p><b>Wiem:</b> ${state.know} &nbsp; <b>Nie wiem:</b> ${state.dont}</p>
-          </div>
-        `;
-        document.getElementById('status').innerText = 'Zakończono';
-        document.getElementById('counter').innerText = `${state.cards.length}/${state.cards.length}`;
-        document.getElementById('bar').style.width = '100%';
-        return;
-      }
-
-      const c = state.queue[0];
-      const done = state.cards.length - state.queue.length;
-
-      app.innerHTML = `
-        <div class="card">
-          <div class="section-title">Pytanie ${c.n}</div>
-          <div class="content">${renderText(c.q)}</div>
-
-          ${state.show ? `
+    <div class="wrap">
+        <div class="header">
             <div>
-              <b>Odpowiedź:</b>
-              <div class="content">${renderText(c.a)}</div>
+                <h1>Fiszki</h1>
+                <div class="sub">Plik fiszki.txt + obrazki w tym samym folderze</div>
             </div>
-          ` : ''}
-
-          <div class="buttons">
-            <button class="primary" onclick="toggle()">${state.show ? 'Ukryj' : 'Pokaż'}</button>
-            <button class="good" onclick="next(true)">Wiem</button>
-            <button class="bad" onclick="next(false)">Nie wiem</button>
-          </div>
+            <div class="chipbar">
+                <div class="chip" id="total">Fiszki: 0</div>
+                <div class="chip green" id="know">Wiem: 0</div>
+                <div class="chip red" id="dont">Do nauki: 0</div>
+                <button class="btn-reset" id="btnReset" onclick="resetProgress()" title="Wyczyść zapisany progres">↺ Reset</button>
+            </div>
         </div>
-      `;
 
-      document.getElementById('counter').innerText = `${done}/${state.cards.length} opanowane`;
-      document.getElementById('bar').style.width = (done / state.cards.length * 100) + '%';
-      document.getElementById('status').innerText = `Pozostało: ${state.queue.length}`;
-    }
+        <div class="panel">
+            <div class="main">
+                <div class="progress">
+                    <div id="status">Ładowanie...</div>
+                    <div id="counter">0/0</div>
+                </div>
+                <div class="bar"><div id="bar"></div></div>
 
-    function toggle() {
-      state.show = !state.show;
-      render();
-    }
+                <div id="app"></div>
+                <div id="error"></div>
+            </div>
+        </div>
+    </div>
 
-    function next(ok) {
-      const card = state.queue.shift();
+    <script>
+        (function() {
+            // ────────────────────────────────────
+            // STAN APLIKACJI
+            // ────────────────────────────────────
+            const STORAGE_KEY = 'flashcards_mastered_v2';
 
-      if (ok) {
-        state.know++;
-      } else {
-        state.dont++;
-        state.queue.push(card);
-      }
+            const state = {
+                cards: [], // wszystkie sparsowane fiszki
+                queue: [], // fiszki do przejrzenia (jeszcze nie opanowane)
+                mastered: new Set(), // numery fiszek trwale opanowanych (z localStorage)
+                show: false, // czy odpowiedź jest widoczna
+                sessionKnow: 0, // ile fiszek opanowano w tej sesji
+                sessionDont: 0, // ile razy kliknięto "Nie wiem" w tej sesji
+                initialMasteredCount: 0 // ile było opanowanych przy starcie (do podsumowania)
+            };
 
-      state.show = false;
-      render();
-    }
+            // Referencje do elementów DOM
+            const app = document.getElementById('app');
+            const errorEl = document.getElementById('error');
+            const statusEl = document.getElementById('status');
+            const counterEl = document.getElementById('counter');
+            const barEl = document.getElementById('bar');
+            const totalChip = document.getElementById('total');
+            const knowChip = document.getElementById('know');
+            const dontChip = document.getElementById('dont');
+            const btnReset = document.getElementById('btnReset');
 
-    async function load() {
-      try {
-        const r = await fetch('fiszki.txt');
-        if (!r.ok) throw new Error('Brak pliku fiszki.txt (' + r.status + ')');
+            // ────────────────────────────────────
+            // LOCAL STORAGE – ZAPIS / ODCZYT
+            // ────────────────────────────────────
+            function loadProgress() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (raw) {
+                        const arr = JSON.parse(raw);
+                        if (Array.isArray(arr)) {
+                            state.mastered = new Set(arr.filter(n => typeof n === 'number' && Number.isInteger(n)));
+                        }
+                    }
+                } catch (e) {
+                    // localStorage niedostępny lub dane uszkodzone – ignorujemy
+                    state.mastered = new Set();
+                }
+                state.initialMasteredCount = state.mastered.size;
+            }
 
-        const t = await r.text();
-        const c = parse(t);
+            function saveProgress() {
+                try {
+                    const arr = Array.from(state.mastered);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+                } catch (e) {
+                    // localStorage pełny lub niedostępny – cicho pomijamy
+                }
+            }
 
-        if (!c.length) throw new Error('Błąd składni fiszki.txt – brak poprawnych fiszek');
+            function clearProgress() {
+                try {
+                    localStorage.removeItem(STORAGE_KEY);
+                } catch (e) {
+                    // ignorujemy
+                }
+                state.mastered = new Set();
+                state.initialMasteredCount = 0;
+                state.sessionKnow = 0;
+                state.sessionDont = 0;
+                state.show = false;
+                // Odtwórz kolejkę od nowa (wszystkie fiszki)
+                state.queue = [...state.cards];
+            }
 
-        state.cards = c;
-        state.queue = [...c];
-        render();
-      } catch (e) {
-        error.innerText = e.message.includes('404')
-          ? 'Nie znaleziono pliku fiszki.txt'
-          : e.message;
-      }
-    }
+            // ────────────────────────────────────
+            // PARSUJ PLIK fiszki.txt
+            // ────────────────────────────────────
+            function parse(txt) {
+                // Obsługa różnych końców linii (LF, CRLF)
+                const normalized = txt.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
-    load();
-    window.toggle = toggle;
-    window.next = next;
-  </script>
+                const re = /Fiszka\s+(\d+)\s*\n\s*Pytanie:\s*\n([\s\S]*?)\n\s*Odpowiedź:\s*\n([\s\S]*?)(?=\n\s*Fiszka|\n*$)/g;
+                const arr = [];
+                let m;
+                while ((m = re.exec(normalized))) {
+                    arr.push({
+                        n: +m[1],
+                        q: m[2].trim(),
+                        a: m[3].trim()
+                    });
+                }
+
+                // Sortuj po numerze
+                arr.sort((a, b) => a.n - b.n);
+
+                // Weryfikacja – czy nie ma duplikatów numerów
+                const nums = arr.map(c => c.n);
+                const uniqueNums = new Set(nums);
+                if (uniqueNums.size !== nums.length) {
+                    console.warn('Uwaga: wykryto zduplikowane numery fiszek w pliku fiszki.txt');
+                }
+
+                return arr;
+            }
+
+            // ────────────────────────────────────
+            // RENDEROWANIE TEKSTU (wykrywanie obrazków)
+            // ────────────────────────────────────
+            function renderText(t) {
+                if (!t) return '';
+                // Znajdź nazwy plików graficznych i zamień na <img>
+                return t.replace(
+                    /([^\s()<>]+\.(png|jpg|jpeg|webp|gif|svg|bmp))/gi,
+                    '<img src="$1" alt="Obrazek" onerror="this.style.display=\'none\'" loading="lazy">'
+                );
+            }
+
+            // ────────────────────────────────────
+            // AKTUALIZUJ CHIPSY (górny pasek)
+            // ────────────────────────────────────
+            function updateChips() {
+                const totalMastered = state.mastered.size;
+                const remaining = state.queue.length;
+
+                totalChip.innerText = `Fiszki: ${state.cards.length}`;
+                knowChip.innerText = `Wiem: ${totalMastered}`;
+                dontChip.innerText = `Do nauki: ${remaining}`;
+            }
+
+            // ────────────────────────────────────
+            // POKAŻ TOAST (krótki komunikat)
+            // ────────────────────────────────────
+            function showToast(msg) {
+                const existing = document.querySelector('.toast');
+                if (existing) existing.remove();
+
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.textContent = msg;
+                document.body.appendChild(toast);
+
+                // Automatyczne usunięcie po animacji
+                setTimeout(() => {
+                    if (toast.parentNode) toast.remove();
+                }, 2600);
+            }
+
+            // ────────────────────────────────────
+            // GŁÓWNE RENDEROWANIE
+            // ────────────────────────────────────
+            function render() {
+                updateChips();
+
+                // Brak fiszek w ogóle
+                if (state.cards.length === 0) {
+                    app.innerHTML = `
+                        <div class="end">
+                            <h2>Brak fiszek</h2>
+                            <p>Nie znaleziono żadnych fiszek w pliku <b>fiszki.txt</b>.</p>
+                            <p style="color:var(--muted);font-size:14px;">
+                                Format pliku:<br>
+                                <code>Fiszka 1<br>Pytanie:<br>[treść]<br>Odpowiedź:<br>[treść]</code>
+                            </p>
+                        </div>`;
+                    statusEl.innerText = 'Brak danych';
+                    counterEl.innerText = '0/0';
+                    barEl.style.width = '0%';
+                    return;
+                }
+
+                // Wszystkie fiszki opanowane – gratulacje
+                if (state.queue.length === 0) {
+                    const totalMastered = state.mastered.size;
+                    const sessionMsg = state.sessionKnow > 0 ?
+                        `W tej sesji opanowałeś: <b>${state.sessionKnow}</b> fiszek.` :
+                        '';
+
+                    app.innerHTML = `
+                        <div class="end">
+                            <h2>🎉 Gratulacje!</h2>
+                            <p>Wszystkie fiszki zostały opanowane.</p>
+                            <p><b>Łącznie wiem:</b> ${totalMastered} z ${state.cards.length}</p>
+                            ${sessionMsg ? `<p>${sessionMsg}</p>` : ''}
+                            ${state.sessionDont > 0 ? `<p style="color:var(--muted);">Kliknięto „Nie wiem”: ${state.sessionDont} razy</p>` : ''}
+                            <button class="btn-reset" onclick="resetProgress()" style="margin-top:16px;padding:12px 22px;font-size:15px;">
+                                ↺ Zacznij od nowa (resetuj postępy)
+                            </button>
+                        </div>`;
+                    statusEl.innerText = 'Zakończono';
+                    counterEl.innerText = `${state.cards.length}/${state.cards.length} opanowane`;
+                    barEl.style.width = '100%';
+                    return;
+                }
+
+                // Normalny widok – pokaż pierwszą fiszkę z kolejki
+                const c = state.queue[0];
+                const done = state.cards.length - state.queue.length;
+
+                app.innerHTML = `
+                    <div class="card">
+                        <div class="section-title">Pytanie ${c.n}</div>
+                        <div class="content">${renderText(c.q)}</div>
+
+                        ${state.show ? `
+                            <div class="answer-block">
+                                <b>Odpowiedź:</b>
+                                <div class="content">${renderText(c.a)}</div>
+                            </div>
+                        ` : ''}
+
+                        <div class="buttons">
+                            <button class="primary" id="btnToggle">${state.show ? 'Ukryj odpowiedź' : 'Pokaż odpowiedź'}</button>
+                            <button class="good" id="btnKnow">Wiem ✓</button>
+                            <button class="bad" id="btnDont">Nie wiem ✗</button>
+                        </div>
+                    </div>
+                `;
+
+                // Podepnij event listenery (bezpieczniej niż onclick w innerHTML)
+                const btnToggle = document.getElementById('btnToggle');
+                const btnKnow = document.getElementById('btnKnow');
+                const btnDont = document.getElementById('btnDont');
+
+                if (btnToggle) btnToggle.addEventListener('click', toggle);
+                if (btnKnow) btnKnow.addEventListener('click', () => next(true));
+                if (btnDont) btnDont.addEventListener('click', () => next(false));
+
+                // Aktualizuj pasek postępu
+                const pct = state.cards.length > 0 ? (done / state.cards.length * 100) : 0;
+                counterEl.innerText = `${done}/${state.cards.length} opanowane (zapisane)`;
+                barEl.style.width = pct + '%';
+                statusEl.innerText = `Pozostało do przejrzenia: ${state.queue.length}`;
+            }
+
+            // ────────────────────────────────────
+            // AKCJE UŻYTKOWNIKA
+            // ────────────────────────────────────
+            function toggle() {
+                state.show = !state.show;
+                render();
+            }
+
+            function next(ok) {
+                if (state.queue.length === 0) {
+                    render();
+                    return;
+                }
+
+                const card = state.queue.shift();
+
+                if (ok) {
+                    // Użytkownik wie – zapamiętaj jako opanowane
+                    state.mastered.add(card.n);
+                    state.sessionKnow++;
+                    saveProgress();
+
+                    if (state.queue.length === 0 && state.mastered.size === state.cards.length) {
+                        // Właśnie opanowano ostatnią fiszkę
+                        state.show = false;
+                        render();
+                        showToast('🎉 Ostatnia fiszka opanowana!');
+                        return;
+                    }
+                } else {
+                    // Użytkownik nie wie – wrzuć z powrotem na koniec kolejki
+                    state.sessionDont++;
+                    state.queue.push(card);
+                }
+
+                state.show = false;
+                render();
+            }
+
+            function resetProgress() {
+                const confirmed = confirm(
+                    'Czy na pewno chcesz zresetować wszystkie postępy?\n\n' +
+                    'Wszystkie fiszki wrócą do kolejki, a zapisane dane „Wiem” zostaną usunięte z przeglądarki.'
+                );
+                if (!confirmed) return;
+
+                clearProgress();
+                render();
+                showToast('↺ Postępy zresetowane – zacznij od nowa');
+            }
+
+            // ────────────────────────────────────
+            // INICJALIZACJA
+            // ────────────────────────────────────
+            async function init() {
+                // 1. Wczytaj zapisany progres z localStorage
+                loadProgress();
+
+                // 2. Pobierz i sparsuj plik fiszki.txt
+                try {
+                    const response = await fetch('fiszki.txt');
+                    if (!response.ok) {
+                        throw new Error(`Nie znaleziono pliku fiszki.txt (status ${response.status})`);
+                    }
+                    const text = await response.text();
+                    const cards = parse(text);
+
+                    if (!cards.length) {
+                        throw new Error(
+                            'Plik fiszki.txt nie zawiera poprawnych fiszek.\n\n' +
+                            'Oczekiwany format:\n' +
+                            'Fiszka 1\nPytanie:\nTreść pytania...\nOdpowiedź:\nTreść odpowiedzi...\n\n' +
+                            'Fiszka 2\nPytanie:\n...'
+                        );
+                    }
+
+                    state.cards = cards;
+
+                    // 3. Odfiltruj już opanowane fiszki z kolejki
+                    //    (zachowaj tylko te, których numer NIE jest w mastered)
+                    const unmastered = cards.filter(c => !state.mastered.has(c.n));
+
+                    // Jeśli wszystkie są opanowane, kolejka będzie pusta → gratulacje
+                    state.queue = unmastered;
+
+                    // 4. Usuń z mastered numery, których nie ma już w pliku
+                    //    (gdyby użytkownik zmienił plik i usunął jakieś fiszki)
+                    const existingNums = new Set(cards.map(c => c.n));
+                    let cleaned = false;
+                    for (const n of state.mastered) {
+                        if (!existingNums.has(n)) {
+                            state.mastered.delete(n);
+                            cleaned = true;
+                        }
+                    }
+                    if (cleaned) {
+                        saveProgress();
+                        state.initialMasteredCount = state.mastered.size;
+                    }
+
+                    // 5. Renderuj
+                    errorEl.innerText = '';
+                    render();
+
+                    // 6. Pokaż informację o przywróconym progresie (jeśli dotyczy)
+                    if (state.initialMasteredCount > 0 && state.queue.length > 0) {
+                        setTimeout(() => {
+                            showToast(
+                                `📂 Przywrócono postęp: ${state.initialMasteredCount} fiszek już znasz. ` +
+                                `Pozostało: ${state.queue.length}`
+                            );
+                        }, 600);
+                    } else if (state.initialMasteredCount > 0 && state.queue.length === 0) {
+                        setTimeout(() => {
+                            showToast('🎉 Wszystkie fiszki już opanowane (zapisane w przeglądarce)');
+                        }, 600);
+                    }
+
+                } catch (e) {
+                    console.error('Błąd ładowania:', e);
+                    errorEl.innerText = e.message || 'Nieznany błąd podczas ładowania fiszek.';
+                    state.cards = [];
+                    state.queue = [];
+                    render();
+                }
+            }
+
+            // Eksponuj funkcje globalnie (dla przycisku reset w innerHTML gratulacji)
+            window.resetProgress = resetProgress;
+
+            // Start
+            init();
+        })();
+    </script>
 </body>
 </html>
