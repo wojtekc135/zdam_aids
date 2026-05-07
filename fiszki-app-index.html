@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fiszki</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #60a5fa;
+      --good: #22c55e;
+      --bad: #ef4444;
+      --border: rgba(255,255,255,.08);
+      --shadow: 0 18px 50px rgba(0,0,0,.25);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0%, var(--bg) 55%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: space-between;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    h1 { margin: 0; font-size: 38px; }
+    .sub { color: var(--muted); margin-top: 6px; }
+
+    .chipbar { display:flex; gap:10px; flex-wrap:wrap; }
+    .chip {
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+    }
+
+    .panel {
+      background: rgba(17, 24, 39, .92);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .main { padding: 22px; }
+
+    .progress { color: var(--muted); display:flex; justify-content:space-between; }
+
+    .bar { height: 12px; background: rgba(255,255,255,.07); border-radius:999px; overflow:hidden; margin-top:10px; }
+    .bar > div { height:100%; width:0%; background: linear-gradient(90deg,var(--accent),#a78bfa); }
+
+    .card {
+      margin-top: 18px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: rgba(255,255,255,.03);
+      min-height: 320px;
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+    }
+
+    .section-title { color: var(--muted); margin:0; }
+    .content { font-size: 20px; white-space: pre-wrap; line-height:1.6; }
+
+    img { max-width:100%; border-radius:12px; margin:10px 0; border:1px solid var(--border); }
+
+    .buttons { display:flex; gap:12px; margin-top:auto; }
+    button {
+      border:0; padding:12px 16px; border-radius:12px; font-weight:700;
+      cursor:pointer;
+    }
+    .primary { background: var(--accent); color:#fff; }
+    .good { background: var(--good); color:#fff; }
+    .bad { background: var(--bad); color:#fff; }
+
+    .end { text-align:center; padding:40px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div>
+        <h1>Fiszki</h1>
+        <div class="sub">Jedna paczka fiszek z pliku fiszki.txt (i obrazków w tym samym folderze)</div>
+      </div>
+      <div class="chipbar">
+        <div class="chip" id="total">Fiszki: 0</div>
+        <div class="chip" id="know">Wiem: 0</div>
+        <div class="chip" id="dont">Nie wiem: 0</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="main">
+        <div class="progress">
+          <div id="status">Ładowanie...</div>
+          <div id="counter">0/0</div>
+        </div>
+        <div class="bar"><div id="bar"></div></div>
+
+        <div id="app"></div>
+        <div id="error" style="color:#fca5a5;margin-top:10px;"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const state = {
+  cards: [],
+  i: 0,
+  show: false,
+  know: 0,
+  dont: 0
+};
+
+const app = document.getElementById('app');
+const error = document.getElementById('error');
+
+function parse(txt) {
+  const re = /Fiszka\s+(\d+)\s*\n\s*Pytanie:\s*\n([\s\S]*?)\n\s*Odpowiedź:\s*\n([\s\S]*?)(?=\n\s*Fiszka|$)/g;
+  let m, arr=[];
+  while((m=re.exec(txt))){
+    arr.push({n:+m[1],q:m[2].trim(),a:m[3].trim()});
+  }
+  return arr.sort((a,b)=>a.n-b.n);
+}
+
+function renderText(t){
+  return t.replace(/([^\s]+\.(png|jpg|jpeg|webp|gif))/g,'<img src="$1" onerror="this.remove()">');
+}
+
+function render(){
+  if(state.i>=state.cards.length){
+    app.innerHTML=`<div class='end'><h2>Gratulacje 🎉</h2></div>`;
+    return;
+  }
+
+  const c=state.cards[state.i];
+  app.innerHTML=`
+    <div class='card'>
+      <div class='section-title'>Pytanie ${c.n}</div>
+      <div class='content'>${renderText(c.q)}</div>
+
+      ${state.show?`<div><b>Odpowiedź:</b><div class='content'>${renderText(c.a)}</div></div>`:''}
+
+      <div class='buttons'>
+        <button class='primary' onclick='toggle()'>${state.show?'Ukryj':'Pokaż'}</button>
+        <button class='good' onclick='next(true)' ${state.show?'':'disabled'}>Wiem</button>
+        <button class='bad' onclick='next(false)' ${state.show?'':'disabled'}>Nie wiem</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('counter').innerText=`${state.i+1}/${state.cards.length}`;
+  document.getElementById('bar').style.width=(state.i/state.cards.length*100)+'%';
+}
+
+function toggle(){ state.show=!state.show; render(); }
+function next(ok){ ok?state.know++:state.dont++; state.i++; state.show=false; render(); }
+
+async function load(){
+  try{
+    const r=await fetch('fiszki.txt');
+    if(!r.ok) throw new Error('Brak pliku fiszki.txt ('+r.status+')');
+    const t=await r.text();
+    const c=parse(t);
+    if(!c.length) throw new Error('Błąd składni fiszki.txt – brak poprawnych fiszek');
+    state.cards=c;
+    render();
+  }catch(e){
+    error.innerText =
+      e.message.includes('404')
+        ? 'Nie znaleziono pliku fiszki.txt'
+        : e.message;
+  }
+}
+
+load();
+window.toggle=toggle;
+window.next=next;
+</script>
+</body>
+</html>
