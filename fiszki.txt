@@ -1,0 +1,98 @@
+Fiszka 1
+Pytanie:
+Czym jest i czemu algorytm prima jest motywacją do kopcow? Jaki ma to związek z kolejką priorytetową?
+Odpowiedź:
+Algorytm prima buduje minimalne drzewo rozpinające, co iteracje w drzewie które jest już MST wybiera 1 wierzchołek spoza MST, którego krawędź incydentalna ma najmniejszą wage. B Będziemy chcieli wybierać z zbioru incydentalnych krawędź, krawędź o minimalnej wadze i dodawać nowe krawędzie. Kolejka priorytetowa w szybki sposób wykonuje funkcje insert, delete_min i min. Do realizacji kolejki priorytetowej będzie służył kopiec.
+Fiszka 2
+Pytanie:
+Jaka jest struktura i uporządkowanie kopca?
+Odpowiedź:
+Struktura: Kopiec są to drzewa, które powstają poprzez dopisanie liścia na najwyższym poziomie, najbardziej z prawej strony. Czyli drzewa które mają pełne poziomy, oprócz ostatniego który może być uzupełniony od lewej do prawej strony.
+Uporządkowanie: Każdy wierzchołek pamięta jedną liczbe, wartości na ścieżkach od korzenia do liści tworzą ciąg rosnący/malejący.
+Fiszka 3
+Pytanie:
+W jaki sposób pamięta się kopce? Na jakich indeksach są pamiętane wierzchołki z poziomu k, gdzie jest ojciec wierzchołka w K[i], a gdzie dzieci.
+Odpowiedź:
+Kopce zapamiętuje się w tablicy, w taki sposób, że w T[0] jest korzeń, w kolejnych 2 elementach synowie korzenia i tak dalej. Uogólniając wierzchołki z k-poziomu są pamiętane w od K[2^k] do K[(2^k)-1], ojciec w K[i div 2] dzieci w K[i*2] oraz K[(i*2) + 1]
+Fiszka 4
+Pytanie:
+Jak wygląda zmiana wartości klucza w kopcu? Pokaż na przykładzie oraz algorytm.
+1_4_pytanie_przykład_grafu_zamiana_klucza_kopca.png
+Odpowiedź:
+9 na 12 nic nie zmienia, uporządkowanie kopca jest nadal dobre
+9 na 3 poddrzewo (3, 26,19) jest dobrym kopcem, 3 musi isc do góry, wiec zamieniamy miejscami 3 i 8, sprawdzamy czy na dole 8 nic nie psuje, ale nic nie psuje bo 8 i tak była nad 3 wiec 8 i tak jest mniejsza, sprawdzamy dalej 3 i 4, kolejny swap. Ponownie 4 nic nie psuje 3 jest w korzeniu dalej iść nie musi
+9 na 30 teraz 30 nie psuje relacje z swoim ojcem, problem pojawia się w poddrzewie, pojawia się pytanie czy zamienić z 26 czy 19, gdybyśmy zrobili swap z 26 to 26 byłoby większe od 19, więc trzeba zrobić swap z mniejszym z synów, więc swap 30 z 19. po swapie to co na górze ma zawsze dobrą relacje bo i tak dajemy coś większego.
+Przykładowe procedury (na wykładzie było że można samemu lepiej napisać)
+procedure zmień-element(K[1..n], i, u)
+    x <- K[i]
+    K[i] <- u
+    if u < x then przesuń-niżej(K, i)
+             else przesuń-wyżej(K, i)
+
+procedure przesuń-niżej(K[1..n], i)
+    k <- i
+    repeat
+        j <- k
+        if 2j <= n and K[2j] > K[k] then k <- 2j
+        if 2j < n and K[2j + 1] > K[k] then k <- 2j + 1
+        K[j] <-> K[k]
+    until j = k
+
+procedure przesuń-wyżej(K[1..n], i)
+    k <- i
+    repeat
+        j <- k
+        if j > 1 and K[j div 2] < K[k] then k <- j div 2
+        K[j] <-> K[k]
+    until j = k
+Fiszka 5
+Pytanie:
+Jak zbudować kopiec z a1,a2,...,an (wolna budowa kopca) dodając wierzchołki na koniec? Jaki jest koszt? (było takie gówno na egzaminie mimo że to nieoptymalne)
+Odpowiedź:
+Można dodawać nowe elementy na koniec kopca, a potem naprawiać jego struktury przy pomocy przesuń wyżej.
+Procedure wolna_budowa_kopca(K[1...n])
+   for i <- 2 to n przesuń_wyżej(K,i)
+Liści jest sufit(n/2) liści i trzeba je przesuwać na samą góre poprzez około log n porównań, więc łącznie Theta(nlog n)
+Fiszka 6
+Pytanie:
+Jak zbudować kopiec używając metody budowania kopca od dołu (procedure buduj_kopiec(K[1...n]))? Jaka jest złożoność?
+Odpowiedź:
+procedure buduj-kopiec(K[1..n])
+    for i <- n div 2 downto 1 przesuń-niżej(K, i)
+1_6_odpowiedz_budowa_kopca.png
+Mamy do wstawienia a1,a2,...,an, możemy zauważyć że na dole drzewa binarnego mamy n/2 liści które są pojedynczymi poprawnymi kopcami. zaczynamy od połowy elementów a, ustawiamy je jako te pojedyczne kopce, dodajemy kolejny poziom zrzucając n/4 elementów na dół poprawnych kopców. Przy takim dodawaniu korzeń może być w złej relacji z swoimi synami, więc trzeba korzeń spuścić na dół. dla n/2 musimy wykonać nic, potem dla n/4 elementów 2 porównania w dół, n/8 - 4 porównania. i tak dalej i dla 1 wierzchołka będzie trzeba spuscic w log(n) poziomow wykonujac 2*log(n) porownan, jak się podsumuje wychodzi theta(n). 2 porównania na poziom a nie 1 bo trzeba wybrać większego z synow, a potem sprawdzić czy trzeba przesunąć.
+Fiszka 7
+Pytanie:
+Napisz pseudokod heapsorta przy uzyciu buduj_kopiec(K) oraz przesun nizej
+Odpowiedź:
+procedure heapsort(K[1..n])
+    buduj-kopiec(K)
+    for i <- n step -1 to 2 do
+        K[1] <-> K[i]
+        przesuń-niej(K[1..i-1], 1)
+    return K
+bierzemy minimum z korzenia dodajemy do rozwiązania (które buduje się na końcu tablicy) usuwamy ostatni element z kopca dajemy na początek i dajemy przesun nizej co przywraca strukturę kopca. Rozwiazanie bierzemy od końca tablicy do początku, sortowanie rosnące. O(nlogn)
+Fiszka 8
+Pytanie:
+Można przyspieszyc heapsort jak?
+Odpowiedź:
+Nie chce misie, jakies dziury
+Fiszka 9
+Pytanie:
+Jak zaimplementować kolejkie priorytetową poprzez kopiec?
+Odpowiedź:
+function find-max(K[1..n])
+    return K[1]
+
+procedure delete-max(K[1..n])
+    K[1] <- K[n]
+    przesuń-niej(K[1..n-1], 1)
+
+procedure insert-node(K[1..n], v)
+    K[n+1] <- v
+    przesuń-wyej(K[1..n+1], n+1)
+Fiszka 10
+Pytanie:
+Jakie są implementacje podwójnej kolejki priorytetowej, jak zrobić operacje usuwania i znajdowania minimum/maksimum w O(1)? 
+Odpowiedź:
+Nie chce misie, jest w notatce 2-kopiec i na ćwiczeniach w zadaniu, wykladowca powiedział ze nigdy się to w zyciu nie przyda, mam nadzieje ze na egzaminie tez
