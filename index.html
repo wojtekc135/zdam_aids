@@ -46,7 +46,7 @@
     h1 { margin: 0; font-size: 38px; }
     .sub { color: var(--muted); margin-top: 6px; }
 
-    .chipbar { display:flex; gap:10px; flex-wrap:wrap; }
+    .chipbar { display: flex; gap: 10px; flex-wrap: wrap; }
     .chip {
       background: rgba(255,255,255,.05);
       border: 1px solid var(--border);
@@ -65,10 +65,27 @@
 
     .main { padding: 22px; }
 
-    .progress { color: var(--muted); display:flex; justify-content:space-between; }
+    .progress {
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
 
-    .bar { height: 12px; background: rgba(255,255,255,.07); border-radius:999px; overflow:hidden; margin-top:10px; }
-    .bar > div { height:100%; width:0%; background: linear-gradient(90deg,var(--accent),#a78bfa); }
+    .bar {
+      height: 12px;
+      background: rgba(255,255,255,.07);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .bar > div {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), #a78bfa);
+      transition: width .25s ease;
+    }
 
     .card {
       margin-top: 18px;
@@ -77,26 +94,53 @@
       border-radius: 20px;
       background: rgba(255,255,255,.03);
       min-height: 320px;
-      display:flex;
-      flex-direction:column;
+      display: flex;
+      flex-direction: column;
       gap: 14px;
     }
 
-    .section-title { color: var(--muted); margin:0; }
-    .content { font-size: 20px; white-space: pre-wrap; line-height:1.6; }
+    .section-title { color: var(--muted); margin: 0; }
+    .content { font-size: 20px; white-space: pre-wrap; line-height: 1.6; }
 
-    img { max-width:100%; border-radius:12px; margin:10px 0; border:1px solid var(--border); }
-
-    .buttons { display:flex; gap:12px; margin-top:auto; }
-    button {
-      border:0; padding:12px 16px; border-radius:12px; font-weight:700;
-      cursor:pointer;
+    img {
+      max-width: 100%;
+      border-radius: 12px;
+      margin: 10px 0;
+      border: 1px solid var(--border);
+      display: block;
     }
-    .primary { background: var(--accent); color:#fff; }
-    .good { background: var(--good); color:#fff; }
-    .bad { background: var(--bad); color:#fff; }
 
-    .end { text-align:center; padding:40px; }
+    .buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: auto;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      min-width: 110px;
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .primary { background: var(--accent); color: #fff; }
+    .good { background: var(--good); color: #fff; }
+    .bad { background: var(--bad); color: #fff; }
+
+    .end {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .end h2 { margin-top: 0; }
   </style>
 </head>
 <body>
@@ -127,80 +171,136 @@
     </div>
   </div>
 
-<script>
-const state = {
-  cards: [],
-  i: 0,
-  show: false,
-  know: 0,
-  dont: 0
-};
+  <script>
+    const state = {
+      cards: [],
+      queue: [],
+      show: false,
+      know: 0,
+      dont: 0
+    };
 
-const app = document.getElementById('app');
-const error = document.getElementById('error');
+    const app = document.getElementById('app');
+    const error = document.getElementById('error');
 
-function parse(txt) {
-  const re = /Fiszka\s+(\d+)\s*\n\s*Pytanie:\s*\n([\s\S]*?)\n\s*Odpowiedź:\s*\n([\s\S]*?)(?=\n\s*Fiszka|$)/g;
-  let m, arr=[];
-  while((m=re.exec(txt))){
-    arr.push({n:+m[1],q:m[2].trim(),a:m[3].trim()});
-  }
-  return arr.sort((a,b)=>a.n-b.n);
-}
+    function parse(txt) {
+      const re = /Fiszka\s+(\d+)\s*\n\s*Pytanie:\s*\n([\s\S]*?)\n\s*Odpowiedź:\s*\n([\s\S]*?)(?=\n\s*Fiszka|$)/g;
+      let m, arr = [];
+      while ((m = re.exec(txt))) {
+        arr.push({
+          n: +m[1],
+          q: m[2].trim(),
+          a: m[3].trim()
+        });
+      }
+      return arr.sort((a, b) => a.n - b.n);
+    }
 
-function renderText(t){
-  return t.replace(/([^\s]+\.(png|jpg|jpeg|webp|gif))/g,'<img src="$1" onerror="this.remove()">');
-}
+    function renderText(t) {
+      return t.replace(/([^\s]+\.(png|jpg|jpeg|webp|gif))/g, '<img src="$1" onerror="this.remove()">');
+    }
 
-function render(){
-  if(state.i>=state.cards.length){
-    app.innerHTML=`<div class='end'><h2>Gratulacje 🎉</h2></div>`;
-    return;
-  }
+    function updateChips() {
+      document.getElementById('total').innerText = `Fiszki: ${state.cards.length}`;
+      document.getElementById('know').innerText = `Wiem: ${state.know}`;
+      document.getElementById('dont').innerText = `Nie wiem: ${state.dont}`;
+    }
 
-  const c=state.cards[state.i];
-  app.innerHTML=`
-    <div class='card'>
-      <div class='section-title'>Pytanie ${c.n}</div>
-      <div class='content'>${renderText(c.q)}</div>
+    function render() {
+      updateChips();
 
-      ${state.show?`<div><b>Odpowiedź:</b><div class='content'>${renderText(c.a)}</div></div>`:''}
+      if (state.cards.length === 0) {
+        app.innerHTML = `<div class="end"><h2>Brak fiszek</h2></div>`;
+        document.getElementById('status').innerText = 'Brak danych';
+        document.getElementById('counter').innerText = '0/0';
+        document.getElementById('bar').style.width = '0%';
+        return;
+      }
 
-      <div class='buttons'>
-        <button class='primary' onclick='toggle()'>${state.show?'Ukryj':'Pokaż'}</button>
-        <button class='good' onclick='next(true)' ${state.show?'':'disabled'}>Wiem</button>
-        <button class='bad' onclick='next(false)' ${state.show?'':'disabled'}>Nie wiem</button>
-      </div>
-    </div>
-  `;
+      if (state.queue.length === 0) {
+        app.innerHTML = `
+          <div class="end">
+            <h2>Gratulacje 🎉</h2>
+            <p>Wszystkie fiszki zostały opanowane.</p>
+            <p><b>Wiem:</b> ${state.know} &nbsp; <b>Nie wiem:</b> ${state.dont}</p>
+          </div>
+        `;
+        document.getElementById('status').innerText = 'Zakończono';
+        document.getElementById('counter').innerText = `${state.cards.length}/${state.cards.length}`;
+        document.getElementById('bar').style.width = '100%';
+        return;
+      }
 
-  document.getElementById('counter').innerText=`${state.i+1}/${state.cards.length}`;
-  document.getElementById('bar').style.width=(state.i/state.cards.length*100)+'%';
-}
+      const c = state.queue[0];
+      const done = state.cards.length - state.queue.length;
 
-function toggle(){ state.show=!state.show; render(); }
-function next(ok){ ok?state.know++:state.dont++; state.i++; state.show=false; render(); }
+      app.innerHTML = `
+        <div class="card">
+          <div class="section-title">Pytanie ${c.n}</div>
+          <div class="content">${renderText(c.q)}</div>
 
-async function load(){
-  try{
-    const r=await fetch('fiszki.txt');
-    if(!r.ok) throw new Error('Brak pliku fiszki.txt ('+r.status+')');
-    const t=await r.text();
-    const c=parse(t);
-    if(!c.length) throw new Error('Błąd składni fiszki.txt – brak poprawnych fiszek');
-    state.cards=c;
-    render();
-  }catch(e){
-    error.innerText =
-      e.message.includes('404')
-        ? 'Nie znaleziono pliku fiszki.txt'
-        : e.message;
-  }
-}
+          ${state.show ? `
+            <div>
+              <b>Odpowiedź:</b>
+              <div class="content">${renderText(c.a)}</div>
+            </div>
+          ` : ''}
 
-load();
-window.toggle=toggle;
-window.next=next;
-</script>
+          <div class="buttons">
+            <button class="primary" onclick="toggle()">${state.show ? 'Ukryj' : 'Pokaż'}</button>
+            <button class="good" onclick="next(true)">Wiem</button>
+            <button class="bad" onclick="next(false)">Nie wiem</button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('counter').innerText = `${done}/${state.cards.length} opanowane`;
+      document.getElementById('bar').style.width = (done / state.cards.length * 100) + '%';
+      document.getElementById('status').innerText = `Pozostało: ${state.queue.length}`;
+    }
+
+    function toggle() {
+      state.show = !state.show;
+      render();
+    }
+
+    function next(ok) {
+      const card = state.queue.shift();
+
+      if (ok) {
+        state.know++;
+      } else {
+        state.dont++;
+        state.queue.push(card);
+      }
+
+      state.show = false;
+      render();
+    }
+
+    async function load() {
+      try {
+        const r = await fetch('fiszki.txt');
+        if (!r.ok) throw new Error('Brak pliku fiszki.txt (' + r.status + ')');
+
+        const t = await r.text();
+        const c = parse(t);
+
+        if (!c.length) throw new Error('Błąd składni fiszki.txt – brak poprawnych fiszek');
+
+        state.cards = c;
+        state.queue = [...c];
+        render();
+      } catch (e) {
+        error.innerText = e.message.includes('404')
+          ? 'Nie znaleziono pliku fiszki.txt'
+          : e.message;
+      }
+    }
+
+    load();
+    window.toggle = toggle;
+    window.next = next;
+  </script>
 </body>
 </html>
