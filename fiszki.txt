@@ -96,3 +96,119 @@ Pytanie:
 Jakie są implementacje podwójnej kolejki priorytetowej, jak zrobić operacje usuwania i znajdowania minimum/maksimum w O(1)? 
 Odpowiedź:
 Nie chce misie, jest w notatce 2-kopiec i na ćwiczeniach w zadaniu, wykladowca powiedział ze nigdy się to w zyciu nie przyda, mam nadzieje ze na egzaminie tez
+Fiszka 11
+Pytanie:
+Mamy nominały monet c1, c2, …, cn, i mamy nieskończenie wiele monet danego nominału, dostajemy też R naturalną - sume którą chcemy wydać w jak najmniejszej ilości monet. Jaki jest algorytm zachłanny wydający tą reszte? 
+Podaj przykład, kiedy ten algorytm zachłanny, daje rozwiązanie optymalne, nieoptymalne, albo nie daje w ogóle rozwiązania. Podpowiedź C={1,2,5,9,10} lub bez 1
+Odpowiedź:
+Narzucającym się rozwiązaniem zachłannym jest wydawanie przy pomocy największych nominałów, a potem coraz mniejszych. Taka strategia nie musi prowadzić do rozwiązania optymalnego, albo nie dać rozwiązania bo to algorytm zachłanny np. C={1,2,5,9,10} optymalnie R=19=10+9, nieoptymalnie R=18, z algorytmu R=10+5+2+1, a można R=9+9. Strategia optymalna nie daje rady C={2,5,9,10} R = 6, wydajemy 5 i 1 się nie da, a da się wybrać 6 = 2+2+2.
+Fiszka 12
+Pytanie:
+Rozważamy grafy nieskierowane G = (V,E;c), gdzie c to funkcja wagowa, opisz zachłanne algorytmy prima, kruskala, boruvki znajdywania minimalnego drzewa rozpinającego grafu G
+Odpowiedź:
+Strategia 1: Algorytm Kruskala
+Rozpoczynamy od pustego E′. Zbiór C jest początkowo równy E. W kolejnym kroku rozpatru
+jemy krawędź z C o minimalnej wadze. Dodajemy ją do E′, o ile nie powoduje to powstania
+cyklu.
+• Strategia 2: Algorytm Prima
+Inicjujemy E′ wstawiając do niego minimalną krawędź spośród krawędzi incydentnych z wierz
+chołkiem v (v- wybierany jest arbitrarnie). Podobnie jak poprzednio zbiór C jest początkowo
+równy E. W kolejnym kroku rozpatrujemy minimalną krawędź z C incydentną z jakąś krawędzią
+z E′ . Dodajemy ją do E′, o ile drugi z jej końców nie jest incydentny z E′.
+• Strategia 3: Algorytm Boruvki
+Strategia ta nieco odbiega od ogólnego schematu. Zbiór E′ budujemy fazami. W każdej fazie
+wykonujemy dwa kroki:- Dla każdego wierzchołka z G znajdujemy najkrótszą incydentną z nim krawędź; krawędzie
+te dołączamy do zbioru E′.- Tworzymy nowy graf G′. Wierzchołki w G′ (nazwijmy je superwierzchołkami) odpowiadają
+spójnym składowym w E′. Dwa superwierzchołki S1 i S2 łączymy krawędzią wtedy i tylko
+wtedy, gdy jakiś wierzchołek z S1 był połączony w G krawędzią z jakimś wierzchołkiem z
+S2. Jako wagę tej krawędzi przyjmujemy minimalną wagę krawędzi w G pomiędzy wierz
+chołkami z S1 i S2.
+Za G przyjmujemy G′ i przechodzimy do nowej fazy
+wizualizacje na yt
+Fiszka 13
+Pytanie:
+Czym jest algorytm zachłanny i jakie są głowne sposoby dowodzenia go
+Odpowiedź:
+A greedy algorithm makes the locally optimal choice at each step, hoping that these local choices lead to a globally optimal solution.
+1. Greedy Choice Property Assume there's an optimal solution that doesn't include the greedy choice Show you can "exchange" a choice in the optimal solution with the greedy choice Prove the modified solution is still optimal Conclude the greedy choice is safe
+2. Exchange Argument - Take any optimal solution If it doesn't use the greedy choice, exchange one element with the greedy choice Show the solution is still optimal (or better) Conclude greedy is safe
+3. indukcja
+Fiszka 14
+Pytanie:
+Użyj exchange argument do udowodnienia algorytmu kruskala
+Odpowiedź:
+Załóżmy że mamy graf i zbiór krawędzi {e1,e2,...,en} 
+Załóżmy że algorytm Kruskala K wybrał krawędzie {ei1,ei2,...,ei(n-1)} i są uporządkowane że rosnąco równie ei<=e(i+1)
+Załóżmy że istnieje algorytm Opt optymalny który wybiera inne krawędzie {ei'1, ei'2, ..., ei'(n-1)}
+Załóżmy że algorytmy K i Opt wybrały jakieś drzewa spinające, optymalnych drzew może być wiele różnych, spośród rozwiązań optymalnych też uporządkujmy je względem rosnących wag, i wybierzmy takie które ma najdłuższy wspólny prefiks z rozwiązaniem algorytmem Kruskala, czyli zgadza się dopóki w jakimś k się nie zgadza. Na k-tej ppozycji mamy 3 możliwości:
+1) Eik < Ei'k Do drzewa optymalnego dorzucamy Eik, Opt lub Eik powstaje cykl C. W cyklu C musi być krawędź cieższa od Eik, bo założyliśmy że prefiks do k z Opt I K jest taki sam, i te krawędzie ,,się nie gryzą tak powiedział na wykładzie", wiec musi być jakiś z prawej strony o większej wadze i usuwamy tą cięższa krawedz żeby usunąć cykl i nowe drzewo ma mniejsza wage niż drzewo optymalne sprzecznosc nie może taki przypadek zachodzic
+2) Eik > Ei'k Algorytm Kruskala rozwazal krawędzie w kolejności rosnącej, doszedł do krawedz Eik która jest wieksza od Ei'k co daje sprzeczność bo powinien wcześniej dodac Ei'k sprzeczność tez nie zachodzi 
+3) Eik = Ei'k Jak w przypadku 1) dorzucamy Eik do zbioru rozwiazan Opt, tworzy się cykl, ale nie możemy powiedzieć ze w tym cyklu jest krawedz ciezsza, bo skoro eik=ei'k a nie rownosci w Opt są >= to jakas waga po prawo od Ei'k jest rowna i można ją usunąć i otrzymujemy drzewo o takiej samej wadze jak optymalne, ale wtedy otrzymujemy drzewo o takiej samej wadze jak drzewo optymalne ale taki sam prefiks jest dłuższy niż z drzewa który wystartowaliśmy, co jest sprzeczne z założeniem że prefiks jest najdluzszy.
+Otrzymujmey zatem sprzeczność z zalozeniem ze istnieje krawedz która jest rozna w K i Opt, zatem K i Opt jest takie samo.
+Fiszka 15
+Pytanie:
+szeregowanie zadań
+Odpowiedź:
+klo powiedział żeby przeczytać sobie w notatkach
+Fiszka 16
+Pytanie:
+Zdefiniuj problem set cover, podaj algorytm zachlanny dzialajacy w czasie log n * Opt, jakie sa algorytmy zachlanne set coveru niekoniecznie dzialajace w dobrym czasie, udowodnij log n * Opt
+Odpowiedź:
+set_cover.png
+set_cover_wyklad.png
+Fiszka 17
+Pytanie:
+Odpowiedź:
+Fiszka 18
+Pytanie:
+Odpowiedź:
+Fiszka 19
+Pytanie:
+Odpowiedź:
+Fiszka 20
+Pytanie:
+Odpowiedź:
+Fiszka 21
+Pytanie:
+Odpowiedź:
+Fiszka 22
+Pytanie:
+Odpowiedź:
+Fiszka 23
+Pytanie:
+Odpowiedź:
+Fiszka 24
+Pytanie:
+Odpowiedź:
+Fiszka 25
+Pytanie:
+Odpowiedź:
+Fiszka 26
+Pytanie:
+Odpowiedź:
+Fiszka 27
+Pytanie:
+Odpowiedź:
+Fiszka 28
+Pytanie:
+Odpowiedź:
+Fiszka 29
+Pytanie:
+Odpowiedź:
+Fiszka 30
+Pytanie:
+Odpowiedź:
+Fiszka 31
+Pytanie:
+Odpowiedź:
+Fiszka 32
+Pytanie:
+Odpowiedź:
+Fiszka 33
+Pytanie:
+Odpowiedź:
+Fiszka 34
+Pytanie:
+Odpowiedź:
+
+
