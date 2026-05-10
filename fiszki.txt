@@ -144,7 +144,7 @@ Załóżmy że algorytmy K i Opt wybrały jakieś drzewa spinające, optymalnych
 1) Eik < Ei'k Do drzewa optymalnego dorzucamy Eik, Opt lub Eik powstaje cykl C. W cyklu C musi być krawędź cieższa od Eik, bo założyliśmy że prefiks do k z Opt I K jest taki sam, i te krawędzie ,,się nie gryzą tak powiedział na wykładzie", wiec musi być jakiś z prawej strony o większej wadze i usuwamy tą cięższa krawedz żeby usunąć cykl i nowe drzewo ma mniejsza wage niż drzewo optymalne sprzecznosc nie może taki przypadek zachodzic
 2) Eik > Ei'k Algorytm Kruskala rozwazal krawędzie w kolejności rosnącej, doszedł do krawedz Eik która jest wieksza od Ei'k co daje sprzeczność bo powinien wcześniej dodac Ei'k sprzeczność tez nie zachodzi 
 3) Eik = Ei'k Jak w przypadku 1) dorzucamy Eik do zbioru rozwiazan Opt, tworzy się cykl, ale nie możemy powiedzieć ze w tym cyklu jest krawedz ciezsza, bo skoro eik=ei'k a nie rownosci w Opt są >= to jakas waga po prawo od Ei'k jest rowna i można ją usunąć i otrzymujemy drzewo o takiej samej wadze jak optymalne, ale wtedy otrzymujemy drzewo o takiej samej wadze jak drzewo optymalne ale taki sam prefiks jest dłuższy niż z drzewa który wystartowaliśmy, co jest sprzeczne z założeniem że prefiks jest najdluzszy.
-Otrzymujmey zatem sprzeczność z zalozeniem ze istnieje krawedz która jest rozna w K i Opt, zatem K i Opt jest takie samo.
+Otrzymujemy zatem sprzeczność z założeniem, że istnieje krawędź różna w rozwiązaniach K i Opt, zatem algorytm Kruskala również zwraca optymalne drzewo spinające.
 Fiszka 15
 Pytanie:
 szeregowanie zadań
@@ -158,37 +158,86 @@ set_cover.png
 set_cover_wyklad.png
 Fiszka 17
 Pytanie:
+Jak zrobić sortowanie przez scalanie. Czemu lepiej nie schodzić do pojedynczych tablic tylko dla małych n robić insert sort
 Odpowiedź:
+merge_sort.png
+Jak n jest małe lepiej zrobić O(n) insert sorta, bo rekurencja i wywolania mogą być większe niż te O(n^2) insert sort bo latwy do zaimplementowania, nie ma sposobu by okreslic jak male ma być n, trzeba dobrac eksperymentalnie ten prog przy którym nie warto dalej schodzić z rekursją.
 Fiszka 18
 Pytanie:
+Jakie jest twierdzenie master's theorem z wykładu?
 Odpowiedź:
+master_theorem.png
+Mba w 2026 fajniej to przedstawił, na wykładzie zdalnym nic nie powiedziane ciekawego 
 Fiszka 19
 Pytanie:
+Jaki jest schemat ogólny algorytmów dziel i zwyciężaj?
 Odpowiedź:
+Algorytmy skonstruowane metodą dziel i zwyciężaj składają się z trzech zasadniczych kroków:
+1. transformacja danych x na dane x1, . . . , xk o mniejszym rozmiarze;
+2. rozwi¡zanie problemu dla danych xi (i = 1, . . . , k);
+3. obliczenie rozwi¡zania dla danych x na podstawie wyników otrzymanych w punkcie 2.
+W naturalny sposób implementowane są jako procedury rekurencyjne:
+
+function DiZ(x)
+if x jest małe lub proste then return AdHoc(x)
+przekształć x na x1, . . . , xk o mniejszym rozmiarze niż x
+for i ← 1 to k do yi ← DiZ(xi)
+na podstawie y1 . . . yk oblicz rozwiązanie y dla x
+return y
+
+gdzie AdHoc jest algorytmem używanym do rozwiązania problemu dla "łatwych" danych.
 Fiszka 20
 Pytanie:
+Jaki wyprowadzić algorytm karatasuby, jak on wygląda i jaką ma złożoność z master's theorem.
 Odpowiedź:
+Dzieli się binarne na lewą i prawą połowe np. a0 i a1, zapisuje się w postaci a1*2^(n/2) itp. mnoży przez siebie i stosuje trik.
+karatsuba.png
 Fiszka 21
 Pytanie:
+Jak uogólnić algorytm karatsuby? klo - W notatkach jest to mało zjadliwe
 Odpowiedź:
+Zamiast dzielić na 2 części, dzielić liczby na k części. Obliczamy wi które są niezależnymi kombinacjami liniowymi ci wi trzeba jakoś wymyślić np. dla dzielenia 3 części np.w4=(A1+A2+A3)(B1+B2+B3) = c0+c1+c2+c3+c4, a potem mnożymy jakieś 2 sumy podzielonych części, aby otrzymać niezależne kombinacje liniowe liczb c gdzie można latwo wyliczyć c0,c1,c2,c4, bo są to niezależne kombinacje liniowe
+karatsuba_3czesci.png
+karatsuba_macierz.png
+W notatkach jest podane jak zrobić to dla dowolnych k
+karatsuba_notatki.png
+
 Fiszka 22
 Pytanie:
+Jednoczesne znajdywanie min i max w zbiorze
 Odpowiedź:
+Był skip na wykładzie, jest w notatkach todo
 Fiszka 23
 Pytanie:
+Czym jest przełącznik a czym sieć przełącznikow?
 Odpowiedź:
+siec_przelacznikow.png
 Fiszka 24
 Pytanie:
+Jeżeli chcemy zrobić siec przelacznikow znajdującą wszystkie n permutacje, ile minimum potrzebujemy przelacznikow? Np. dla n=5, Czym jest głębokość sieci?
 Odpowiedź:
+Permutacji dla przykłądu jest 5!=120 2^k >= 120, czyli z logarytmu k>=7, w ogolnosci 2^k >= n!, s stirlinga k >= ok. nlogn
+głębokość sie =ci, tj. długość maksymalnej drogi od portu wejściowego do portu wyjściowego.
+Długość ta mierzona jest liczbą przełązników znajdujących się na drodze od portu wejściowego
+sie i do portu wyjściowego (oczywiście połączenia między przełącznikamiśą jednokierunkowe)
 Fiszka 25
 Pytanie:
+Jak skonstruować sieć przełączników które realizują wszystkie permutacje, żeby była jak najmniejsza głębokość oraz jak najmniej użyć przełączników? Jaka jest ilość przelacznikow i jaka glebokosc? jak narysować ją dla n = 8?
 Odpowiedź:
+przelaczniki_notatki.png
+benes8.png
 Fiszka 26
 Pytanie:
+Poprawnosc konstrukcji sieci benesa
 Odpowiedź:
+Na wykładzie było pominięte ale z wykladow zdalnych w 2021 roku teraz nwm, todo
 Fiszka 27
 Pytanie:
+punkty_diz_pytanie.png
 Odpowiedź:
+punkty_diz_odpowiedzi.png
+punkty_diz_odpowiedzi2.png
+
 Fiszka 28
 Pytanie:
 Odpowiedź:
